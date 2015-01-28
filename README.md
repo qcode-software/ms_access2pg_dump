@@ -1,4 +1,4 @@
-# Convert Microsoft Access database to PostgreSQL dump files (Visual Basic for Applications recipe)
+# Convert Microsoft Access database to PostgreSQL dump files (VBA recipe)
 by Daniel Clark <daniel@qcode.co.uk> [28/01/2015].
 
 Use DAOs (Database Access Objects) to convert Microsoft Access database into Postgresql DDL statements to recreate database.
