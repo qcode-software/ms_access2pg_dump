@@ -1,5 +1,5 @@
 Sub MSAccess2PGDump(out_file As String)
-  '-- Write PostgreSQL dump file to create PostgreSQL database from a Microsoft Access database
+  '-- Convert Microsoft Access database to a PostgreSQL dump file
   MSAccessTables2PGDump out_file, False
   MSAccessRecords2PGDump out_file, True
   MSAccessIndexes2PGDump out_file, True
@@ -10,7 +10,7 @@ Sub MSAccess2PGDump(out_file As String)
 End Sub
 
 Function MSAccessField2PGDataType(field As Object)
-  '-- Takes DAO field object and returns the equvalent PostgreSQL data type
+  '-- Takes DAO (Data Access Object) field and returns the equvalent PostgreSQL data type
   Dim data_type As String
   
   Select Case field.Type
@@ -22,7 +22,11 @@ Function MSAccessField2PGDataType(field As Object)
       data_type = "boolean"
     Case dbCurrency, dbNumeric, dbDecimal, dbSingle
       data_type = "numeric"
-    Case dbDate, dbTime, dbTimeStamp
+    Case dbDate
+      data_type = "date"
+    Case dbTime
+      data_type = "time with time zone"
+    Case dbTimeStamp
       data_type = "timestamp with time zone"
     Case dbDouble
       data_type = "double precision"
@@ -43,17 +47,19 @@ Function MSAccessField2PGDataType(field As Object)
 End Function
 
 Function MSAccessField2PGDefaultValue(field As Object)
-  '-- Takes DAO field object and returns the equvalent PostgreSQL default value
+  '-- Takes DAO (Data Access Object) field and returns the equivalent PostgreSQL default value
   Dim default_value As String
   
   Select Case field.Type
     Case dbBoolean
+      ' Cast boolean values to true and false
       If field.DefaultValue = "Yes" Then
         default_value = "true"
       Else
         default_value = "false"
       End If
     Case dbText, dbMemo
+      ' quote text values with ' instead of "
       default_value = strQuote(strDeQuote(field.DefaultValue, Chr$(34)), Chr$(39))
     Case Else
       default_value = field.DefaultValue
@@ -109,7 +115,7 @@ Sub MSAccessTables2PGDump(out_file As String, Optional fileAppend As Boolean = F
         Call pushStr(temp_lines, Chr$(9) & "check(" & tdf.ValidationRule & ")")
       End If
       
-      '-- primary key
+      '-- Primary key
       Erase cols
       For Each idx In tdf.Indexes
         If idx.Primary Then
@@ -127,7 +133,7 @@ Sub MSAccessTables2PGDump(out_file As String, Optional fileAppend As Boolean = F
         Call pushStr(lines, temp_lines(i))
       Next i
                             
-      '-- end table def
+      '-- End table def
       Call pushStr(lines, ");")
     End If
   Next
@@ -294,7 +300,7 @@ Sub MSAccessAutoNumbers2PGDump(out_file As String, Optional fileAppend As Boolea
 End Sub
 
 Sub MSAccessRecords2PGDump(out_file As String, Optional fileAppend As Boolean = False)
-  '-- Write PostgreSQL dump file to load data for Microsoft Access Database records
+  '-- Write PostgreSQL dump file to load data for Microsoft Access database records
   Dim lines() As String
   Dim cols() As String
   Dim cols_quoted() As String
