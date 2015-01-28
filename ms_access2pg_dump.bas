@@ -10,7 +10,7 @@ Sub MSAccess2PGDump(out_file As String)
 End Sub
 
 Function MSAccessField2PGDataType(field As Object)
-  '-- Takes DAO (Data Access Object) field and returns the equvalent PostgreSQL data type
+  '-- Takes DAO (Data Access Object) field and returns the equivalent PostgreSQL data type
   Dim data_type As String
   
   Select Case field.Type
