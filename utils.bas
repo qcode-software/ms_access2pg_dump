@@ -1,4 +1,5 @@
 Public Sub ReplaceByRef(str As String, strFind As String, strReplace As String, start As Double, found As Boolean)
+  ' Replace all occurences of strFind in str with strReplace
   Dim Position As Double
   Dim Flength As Double
   Dim Rlength As Double
@@ -15,11 +16,13 @@ Public Sub ReplaceByRef(str As String, strFind As String, strReplace As String, 
 End Sub
 
 Public Function replace(ByVal str As String, ByVal strFind As String, ByVal strReplace As String)
+  ' Return string with all occurences of strFind replaces by strReplace
   Call ReplaceByRef(str, strFind, strReplace, 1, True)
   replace = str
 End Function
 
 Public Sub pushStr(arr() As String, value As String)
+  ' Push string onto an variable length array
   On Error GoTo push_Err
   ReDim Preserve arr(UBound(arr) + 1)
   arr(UBound(arr)) = value
@@ -51,7 +54,7 @@ Function strDeQuote(str As String, quoteChar As String)
     '-- Remove quoting and unescape any quoteChar in string
     strDeQuote = replace(matches.Item(0).SubMatches.Item(0), quoteChar & quoteChar, quoteChar)
   Else
-    '-- String not quoted - just return orignal string
+    '-- String not quoted - just return original string
     strDeQuote = str
   End If
 End Function
