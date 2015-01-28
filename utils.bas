@@ -1,5 +1,5 @@
 Public Sub ReplaceByRef(str As String, strFind As String, strReplace As String, start As Double, found As Boolean)
-  ' Replace all occurences of strFind in str with strReplace
+  ' Replace all occurrences of strFind in str with strReplace
   Dim Position As Double
   Dim Flength As Double
   Dim Rlength As Double
@@ -16,7 +16,7 @@ Public Sub ReplaceByRef(str As String, strFind As String, strReplace As String, 
 End Sub
 
 Public Function replace(ByVal str As String, ByVal strFind As String, ByVal strReplace As String)
-  ' Return string with all occurences of strFind replaces by strReplace
+  ' Return string with all occurrences of strFind replaces by strReplace
   Call ReplaceByRef(str, strFind, strReplace, 1, True)
   replace = str
 End Function
