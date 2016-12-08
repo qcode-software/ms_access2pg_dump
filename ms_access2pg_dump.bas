@@ -179,7 +179,7 @@ Sub MSAccessIndexes2PGDump(out_file As String, Optional fileAppend As Boolean = 
         Erase cols
         For Each field In idx.fields
           line = strQuote(field.name, Chr$(34))
-          If field.Attributes & dbDecending Then
+          If field.Attributes And dbDecending Then
             line = line & " desc"
           Else
             line = line & " asc"
@@ -239,10 +239,10 @@ Sub MSAccessForeignKeys2PGDump(out_file As String, Optional fileAppend As Boolea
       line = "alter table " & strQuote(Relation.ForeignTable, Chr$(34)) _
         & " add foreign key (" & Join(foreign_cols, ", ") & ")" _
         & " references " & strQuote(Relation.Table, Chr$(34)) & " (" & Join(cols, ", ") & ")"
-      If (Relation.Attributes & dbRelationUpdateCascade) <> 0 Then
+      If (Relation.Attributes And dbRelationUpdateCascade) <> 0 Then
         line = line + " on update cascade"
       End If
-      If (Relation.Attributes & dbRelationDeleteCascade) <> 0 Then
+      If (Relation.Attributes And dbRelationDeleteCascade) <> 0 Then
         line = line + " on delete cascade"
       End If
       line = line & ";"
