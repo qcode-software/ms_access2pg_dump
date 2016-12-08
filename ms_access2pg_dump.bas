@@ -41,7 +41,7 @@ Function MSAccessField2PGDataType(field As Object)
         data_type = "varchar(" & field.size & ")"
       End If
     Case Else
-      MsgBox "Error unknown field type " & field.Type & " for table " & tdf.name & " field " & field.name
+      MsgBox "Error unknown field type " & field.Type & " field " & field.name
       Exit Function
   End Select
               
