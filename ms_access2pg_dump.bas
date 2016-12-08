@@ -14,6 +14,8 @@ Function MSAccessField2PGDataType(field As Object)
   Dim data_type As String
   
   Select Case field.Type
+    Case dbByte
+      data_type = "smallint"
     Case dbInteger
       data_type = "smallint"
     Case dbLong
