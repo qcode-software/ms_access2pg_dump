@@ -306,6 +306,7 @@ Sub MSAccessRecords2PGDump(out_file As String, Optional fileAppend As Boolean = 
   Dim lines() As String
   Dim cols() As String
   Dim cols_quoted() As String
+  Dim cols_type() As String
   Dim value As String
   Dim values() As String
   Dim db As Database
@@ -333,9 +334,11 @@ Sub MSAccessRecords2PGDump(out_file As String, Optional fileAppend As Boolean = 
       '-- Columns
       Erase cols
       Erase cols_quoted
+      Erase cols_type
       For Each field In tdf.fields
         Call pushStr(cols, field.name)
         Call pushStr(cols_quoted, strQuote(field.name, Chr$(34)))
+        Call pushStr(cols_type, field.Type)
       Next
       
       '-- PostgreSQL Copy statement
@@ -358,6 +361,16 @@ Sub MSAccessRecords2PGDump(out_file As String, Optional fileAppend As Boolean = 
               value = replace(value, Chr$(10), "\n")
               value = replace(value, Chr$(9), "\t")
               value = replace(value, Chr$(11), "\v")
+              Select Case cols_type(i)
+                Case dbBoolean
+                  If (value = "Wahr") Then
+                    value = "TRUE"
+                  ElseIf (value = "Falsch") Then
+                    value = "False"
+                  End If
+                Case dbCurrency, dbNumeric, dbDecimal, dbSingle, dbDouble
+                  value = replace(value, ",", ".")
+              End Select
               Call pushStr(values, value)
             End If
           Next
