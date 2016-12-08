@@ -14,6 +14,8 @@ Function MSAccessField2PGDataType(field As Object)
   Dim data_type As String
   
   Select Case field.Type
+    Case dbByte
+      data_type = "smallint"
     Case dbInteger
       data_type = "smallint"
     Case dbLong
@@ -39,7 +41,7 @@ Function MSAccessField2PGDataType(field As Object)
         data_type = "varchar(" & field.size & ")"
       End If
     Case Else
-      MsgBox "Error unknown field type " & field.Type & " for table " & tdf.name & " field " & field.name
+      MsgBox "Error unknown field type " & field.Type & " field " & field.name
       Exit Function
   End Select
               
@@ -221,6 +223,7 @@ Sub MSAccessForeignKeys2PGDump(out_file As String, Optional fileAppend As Boolea
   Dim cols() As String
   Dim foreign_cols() As String
   Dim db As Database
+  Dim tempRelationAttributes As Long
    
   Set db = CurrentDb
   
@@ -239,11 +242,19 @@ Sub MSAccessForeignKeys2PGDump(out_file As String, Optional fileAppend As Boolea
       line = "alter table " & strQuote(Relation.ForeignTable, Chr$(34)) _
         & " add foreign key (" & Join(foreign_cols, ", ") & ")" _
         & " references " & strQuote(Relation.Table, Chr$(34)) & " (" & Join(cols, ", ") & ")"
-      If (Relation.Attributes & dbRelationUpdateCascade) <> 0 Then
-        line = line + " on update cascade"
+      If tempRelationAttributes >= dbRelationRight Then
+        tempRelationAttributes = (tempRelationAttributes - dbRelationRight)
       End If
-      If (Relation.Attributes & dbRelationDeleteCascade) <> 0 Then
+      If tempRelationAttributes >= dbRelationLeft Then
+        tempRelationAttributes = (tempRelationAttributes - dbRelationLeft)
+      End If
+      If tempRelationAttributes >= dbRelationDeleteCascade Then
+        tempRelationAttributes = (tempRelationAttributes - dbRelationDeleteCascade)
         line = line + " on delete cascade"
+      End If
+      If tempRelationAttributes >= dbRelationUpdateCascade Then
+        tempRelationAttributes = (tempRelationAttributes - dbRelationUpdateCascade)
+        line = line + " on update cascade"
       End If
       line = line & ";"
               
@@ -304,6 +315,7 @@ Sub MSAccessRecords2PGDump(out_file As String, Optional fileAppend As Boolean = 
   Dim lines() As String
   Dim cols() As String
   Dim cols_quoted() As String
+  Dim cols_type() As String
   Dim value As String
   Dim values() As String
   Dim db As Database
@@ -331,9 +343,11 @@ Sub MSAccessRecords2PGDump(out_file As String, Optional fileAppend As Boolean = 
       '-- Columns
       Erase cols
       Erase cols_quoted
+      Erase cols_type
       For Each field In tdf.fields
         Call pushStr(cols, field.name)
         Call pushStr(cols_quoted, strQuote(field.name, Chr$(34)))
+        Call pushStr(cols_type, field.Type)
       Next
       
       '-- PostgreSQL Copy statement
@@ -356,6 +370,16 @@ Sub MSAccessRecords2PGDump(out_file As String, Optional fileAppend As Boolean = 
               value = replace(value, Chr$(10), "\n")
               value = replace(value, Chr$(9), "\t")
               value = replace(value, Chr$(11), "\v")
+              Select Case cols_type(i)
+                Case dbBoolean
+                  If (value = "Wahr") Then
+                    value = "TRUE"
+                  ElseIf (value = "Falsch") Then
+                    value = "False"
+                  End If
+                Case dbCurrency, dbNumeric, dbDecimal, dbSingle, dbDouble
+                  value = replace(value, ",", ".")
+              End Select
               Call pushStr(values, value)
             End If
           Next
