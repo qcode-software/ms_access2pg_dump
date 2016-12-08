@@ -223,6 +223,7 @@ Sub MSAccessForeignKeys2PGDump(out_file As String, Optional fileAppend As Boolea
   Dim cols() As String
   Dim foreign_cols() As String
   Dim db As Database
+  Dim tempRelationAttributes As Long
    
   Set db = CurrentDb
   
@@ -241,11 +242,19 @@ Sub MSAccessForeignKeys2PGDump(out_file As String, Optional fileAppend As Boolea
       line = "alter table " & strQuote(Relation.ForeignTable, Chr$(34)) _
         & " add foreign key (" & Join(foreign_cols, ", ") & ")" _
         & " references " & strQuote(Relation.Table, Chr$(34)) & " (" & Join(cols, ", ") & ")"
-      If (Relation.Attributes & dbRelationUpdateCascade) <> 0 Then
-        line = line + " on update cascade"
+      If tempRelationAttributes >= dbRelationRight Then
+        tempRelationAttributes = (tempRelationAttributes - dbRelationRight)
       End If
-      If (Relation.Attributes & dbRelationDeleteCascade) <> 0 Then
+      If tempRelationAttributes >= dbRelationLeft Then
+        tempRelationAttributes = (tempRelationAttributes - dbRelationLeft)
+      End If
+      If tempRelationAttributes >= dbRelationDeleteCascade Then
+        tempRelationAttributes = (tempRelationAttributes - dbRelationDeleteCascade)
         line = line + " on delete cascade"
+      End If
+      If tempRelationAttributes >= dbRelationUpdateCascade Then
+        tempRelationAttributes = (tempRelationAttributes - dbRelationUpdateCascade)
+        line = line + " on update cascade"
       End If
       line = line & ";"
               
